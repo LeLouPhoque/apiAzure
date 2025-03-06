@@ -15,8 +15,16 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Simulation d’exécution du Build
-        run: echo "Build en cours"
+      - name: Build de l’image Docker
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/app-devops:latest .
+
+      - name: Login à Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Push de l’image sur Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/app-devops:latest
 
   deployJob:
     runs-on: ubuntu-latest
@@ -25,6 +33,6 @@ jobs:
       - name: Déploiement sur Azure
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "NOM_DE_VOTRE_APPLICATION"
+          app-name: "apiAzure"
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           package: .
